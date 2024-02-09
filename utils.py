@@ -21,11 +21,12 @@ def do_login_flow(scopes, native_client):
 
 
 def get_authorizer(client_id, flow_id=None, collection_ids=None):
-    if flow_id:
-        native_client = globus_sdk.NativeAppAuthClient(client_id)
 
+    native_client = globus_sdk.NativeAppAuthClient(client_id)
+    
+    if flow_id:
         resource_server = flow_id
-        all_scopes = globus_sdk.SpecificFlowClient(flow_id).scopes.user
+        all_scopes = globus_sdk.SpecificFlowClient(flow_id).scopes
         all_scopes = all_scopes.make_mutable("user")
 
         if collection_ids:
