@@ -20,9 +20,14 @@ def do_login_flow(scopes, native_client):
     return tokens
 
 
-def get_authorizer(client_id, flow_id=None, collection_ids=None):
+def get_authorizer(client_id, client_secret=None, flow_id=None, collection_ids=None):
 
-    native_client = globus_sdk.NativeAppAuthClient(client_id)
+    if client_secret:
+        client = globus_sdk.ConfidentialAppAuthClient(
+               client_id=client_id, client_secret=client_secret
+        )
+    else:
+        client = globus_sdk.NativeAppAuthClient(client_id)
     
     if flow_id:
         resource_server = flow_id
@@ -64,24 +69,27 @@ def get_authorizer(client_id, flow_id=None, collection_ids=None):
         tokens = None
 
     if tokens is None:
-        # do a login flow, getting back initial tokens
-        response = do_login_flow(all_scopes, native_client)
+        if client_secret:
+            return globus_sdk.ClientCredentialsAuthorizer(client, all_scopes)
+        else:
+            # do a login flow, getting back initial tokens
+            response = do_login_flow(all_scopes, client)
         # now store the tokens and pull out the correct token
         MY_FILE_ADAPTER.store(response)
         tokens = response.by_resource_server[resource_server]
 
     return globus_sdk.RefreshTokenAuthorizer(
         tokens["refresh_token"],
-        native_client,
+        client,
         access_token=tokens["access_token"],
         expires_at=tokens["expires_at_seconds"],
     )
 
 
-def get_flows_client(client_id):
-    return globus_sdk.FlowsClient(authorizer=get_authorizer(client_id))
+def get_flows_client(client_id, client_secret=None):
+    return globus_sdk.FlowsClient(authorizer=get_authorizer(client_id, client_secret=client_secret))
 
 
-def get_specific_flow_client(flow_id, client_id, collection_ids=None):
-    authorizer = get_authorizer(client_id, flow_id, collection_ids=collection_ids)
+def get_specific_flow_client(flow_id, client_id, client_secret=None, collection_ids=None):
+    authorizer = get_authorizer(client_id, flow_id=flow_id, client_secret=client_secret, collection_ids=collection_ids)
     return globus_sdk.SpecificFlowClient(flow_id, authorizer=authorizer)
