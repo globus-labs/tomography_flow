@@ -1,0 +1,90 @@
+{
+  "Comment": "Transfer and run Tomopy",
+  "StartAt": "FacilityChoice",
+  "States": {
+    "FacilityChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.input.compute_site",
+          "StringEquals": "ALCF",
+          "Next": "ALCFConfig"
+        }
+      ],
+      "Default": "NERSCConfig"
+    },
+    "ALCFConfig": {
+      "Type": "Pass",
+      "Parameters": {
+        "site.$": "$.input.compute_configs.ALCF"
+      },
+      "ResultPath": "$.input.compute",
+      "Next": "TransferInput"
+    },
+    "NERSCConfig": {
+      "Type": "Pass",
+      "Parameters": {
+        "site.$": "$.input.compute_configs.NERSC"
+      },
+      "ResultPath": "$.input.compute",
+      "Next": "TransferInput"
+    },
+    "TransferInput": {
+      "Comment": "Transfer input file",
+      "Type": "Action",
+      "ActionUrl": "https://actions.automate.globus.org/transfer/transfer",
+      "Parameters": {
+        "source_endpoint_id.$": "$.input.source.id",
+        "destination_endpoint_id.$": "$.input.compute.site.transfer_endpoint",
+        "transfer_items": [
+          {
+            "source_path.=": "`$.input.source.path` + `$.input.input_filename`",
+            "destination_path.=": "`$.input.compute.site.staging_path` + `$.input.input_filename`",
+            "recursive": false
+          }
+        ]
+      },
+      "ResultPath": "$.TransferInput",
+      "WaitTime": 300,
+      "Next": "Tomopy"
+    },
+    "Tomopy": {
+      "Comment": "Perform Tomopy analysis",
+      "Type": "Action",
+      "ActionUrl": "https://compute.actions.globus.org/fxap",
+      "Parameters": {
+        "endpoint.$": "$.input.compute.site.compute_endpoint",
+        "function.$": "$.input.compute_function_id",
+        "kwargs": {
+          "save_folder.$": "$.input.compute.site.output_path",
+          "collection_path.$": "$.input.compute.site.collection_path",
+          "filename.=": "`$.input.compute.site.collection_path` + `$.input.compute.site.staging_path` + `$.input.input_filename`",
+          "command.$": "$.input.compute_function_kwargs.command",
+          "reconstruction_type.$": "$.input.compute_function_kwargs.reconstruction_type"
+        }
+      },
+      "ResultPath": "$.TomopyOutput",
+      "WaitTime": 600,
+      "Next": "TransferResults"
+    },
+    "TransferResults": {
+      "Comment": "Transfer results",
+      "Type": "Action",
+      "ActionUrl": "https://actions.automate.globus.org/transfer/transfer",
+      "Parameters": {
+        "source_endpoint_id.$": "$.input.compute.site.transfer_endpoint",
+        "destination_endpoint_id.$": "$.input.source.id",
+        "transfer_items": [
+          {
+            "source_path.$": "$.TomopyOutput.details.result[0][1]",
+            "destination_path.=": "`$.input.result_path` + `$.TomopyOutput.details.result[0][0]`",
+            "recursive": false
+          }
+        ]
+      },
+      "ResultPath": "$.TransferFiles",
+      "WaitTime": 300,
+      "End": true
+    }
+  }
+}
