@@ -1,4 +1,5 @@
 tomopy
+dxchange
 pyyaml
 h5py
 meta
