@@ -25,9 +25,7 @@ tomography_flow/
 └── README.md # This file
 
 
-## Building the Container Image
-
-1. **Clone the Repository:**
+## Building the container Image
    ```bash
    cd recipes
    podman build -t tomography_flow:latest .
@@ -36,8 +34,8 @@ tomography_flow/
 
 ## Running the container
 
-```bash
-podman run -it --rm \
+  ```bash
+  podman run -it --rm \
   -v "/home/ravescovi/Downloads/NSLS2":/data \
   -v "/home/ravescovi/workspace/tomography_flow":/app \
   tomography_flow:latest python3 /app/tomo_flow/run_tomopy.py \
