@@ -17,19 +17,21 @@ tomography_flow/
 ├── tomo_flow/ # Package containing the tomo_flow module (with recon.py, etc.)
 │ └── recon.py
 │ └── run_tomopy.py # Script to run the tomographic reconstruction workflow 
+│ └── flow_definition.json
 ├── notebooks/
+│ └── tomo_nsls_244.ipynb 
+│ └── Tomography-flow.ipynb
 ├── imgs/
 └── README.md # This file
-
-## Prerequisites
 
 
 ## Building the Container Image
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/ravescovi/tomography_flow.git
-   cd tomography_flow
+   cd recipes
+   podman build -t tomography_flow:latest .
+   cd ..
    ```
 
 ## Running the container
