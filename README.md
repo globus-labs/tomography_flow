@@ -9,38 +9,42 @@ This repository demonstrates how [Tomopy](https://tomopy.readthedocs.io/en/lates
 We use [Globus Compute](https://globus-compute.readthedocs.io/en/latest/index.html) to perform Tomopy remotely. To plug your own Compute endpoint in you will need to install globus-compute-endpoint and the tomopy dependencies listed in compute-requirements.txt
 
 
-
-# tomography_flow Container
-
-This repository, `tomography_flow`, provides an OCI recipe for building a container image designed for tomographic data processing. The container installs:
-
-- **tomopy** – For tomographic reconstruction (installed from conda-forge)
-- **dxchange** – For data exchange utilities (installed from conda-forge)
-- **globus-compute-sdk** – For interacting with Globus Compute (installed via pip)
-
-It also includes a script, `run_tomopy.py`, which performs a complete tomographic reconstruction workflow.
-
 ## Repository Structure
 
 tomography_flow/ 
 ├── recipes/ 
 │ └── Dockerfile # OCI recipe for building the container image 
-├── run_tomopy.py # Script to run the tomographic reconstruction workflow 
-├── tomography_flow/ # Package containing the tomo_flow module (with recon.py, etc.) 
+├── tomo_flow/ # Package containing the tomo_flow module (with recon.py, etc.)
+│ └── recon.py
+│ └── run_tomopy.py # Script to run the tomographic reconstruction workflow 
+├── notebooks/
+├── imgs/
 └── README.md # This file
 
 ## Prerequisites
 
-- **Podman**: Ensure Podman is installed.
-    ```bash
-    sudo apt-get update && sudo apt-get install podman
-    ```
-- **Git**: To clone the repository.
-- **Miniconda3**: The container uses conda to install packages from conda-forge.
 
 ## Building the Container Image
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your_username/tomography_flow.git
+   git clone https://github.com/ravescovi/tomography_flow.git
    cd tomography_flow
+   ```
+
+## Running the container
+
+```bash
+podman run -it --rm \
+  -v "/home/ravescovi/Downloads/NSLS2":/data \
+  -v "/home/ravescovi/workspace/tomography_flow":/app \
+  tomography_flow:latest python3 /app/tomo_flow/run_tomopy.py \
+    --proj-file /data/scan_00244/proj_00000.hdf \
+    --angles-file /data/scan_00244/scan_00244.nxs \
+    --dark-file /data/scan_00245/dark_00000.hdf \
+    --flat-file /data/scan_00245/flat_00000.hdf \
+    --recon-init 1000 \
+    --recon-end 1010 \
+    --output-dir /data/scan_00244/recon_output \
+    --show-images
+    ```
