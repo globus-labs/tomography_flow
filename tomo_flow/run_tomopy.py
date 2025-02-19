@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from recon import load_data, recon_data, save_data, save_images
+from recon import load_data, recon_data, save_data, save_images, show_images
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -50,7 +50,6 @@ def main():
 
     # Optionally display the images.
     if args.show_images:
-        from tomography_flow.tomo_flow.recon import show_images
         show_images(proj_norm, recon)
 
     print(f"Processing complete. Check the '{args.output_dir}' directory for results.")
