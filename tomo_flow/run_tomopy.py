@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from tomography_flow.tomo_flow.recon import load_data, recon_data, save_data, save_images
+from recon import load_data, recon_data, save_data, save_images
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -18,15 +18,18 @@ def parse_args():
                         help="Starting slice for reconstruction (default: 1000).")
     parser.add_argument("--recon-end", type=int, default=1512,
                         help="Ending slice for reconstruction (default: 1512).")
-    # Although rot_center is now computed automatically, you can optionally pass one
     parser.add_argument("--rot-center", type=float, default=None,
                         help="Rotation center for reconstruction (default: None).")
+    parser.add_argument("--output-dir", type=str, default='recon_output',
+                        help="Output directory for saving results.")
+    parser.add_argument("--show-images", action='store_true',
+                        help="Display images after processing.")
     return parser.parse_args()
 
 def main():
     args = parse_args()
 
-    # Load data using the provided reconstruction slice limits.
+    # Load the data with specified slice limits.
     proj, flats, darks, theta = load_data(
         args.proj_file,
         args.flat_file,
@@ -37,16 +40,20 @@ def main():
     )
 
     # Perform the reconstruction.
-    # This function returns the reconstructed volume, the normalized projection data, and the calculated rotation center.
     recon, proj_norm, rot_center = recon_data(proj, flats, darks, theta)
 
-    # Save the reconstructed data (TIFF stack and rotation center value) to an output directory.
-    save_data(recon, rot_center, output_dir='recon_output')
+    # Save the reconstructed volume and write out the rotation center.
+    save_data(recon, rot_center, output_dir=args.output_dir)
 
-    # Save representative images (sinogram and middle slice) of the normalized projection and reconstruction.
-    save_images(proj_norm, recon, output_dir='recon_output')
+    # Save representative images (sinogram and middle slice).
+    save_images(proj_norm, recon, output_dir=args.output_dir)
 
-    print("Processing complete. Check the 'recon_output' directory for results.")
+    # Optionally display the images.
+    if args.show_images:
+        from tomography_flow.tomo_flow.recon import show_images
+        show_images(proj_norm, recon)
+
+    print(f"Processing complete. Check the '{args.output_dir}' directory for results.")
 
 if __name__ == '__main__':
     main()

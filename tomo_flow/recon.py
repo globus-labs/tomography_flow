@@ -55,12 +55,11 @@ def save_data(recon, rot_center, output_dir='recon'):
     Saves the reconstructed volume as a stack of TIFF files and writes the
     rotation center to a text file in the specified output directory.
     """
-    from dxchange import write_tiff_stack
-
+    import dxchange
     os.makedirs(output_dir, exist_ok=True)
 
     # Save the reconstruction; files will be written with a prefix in the output directory.
-    write_tiff_stack(recon, fname=os.path.join(output_dir, 'recon'), axis=0)
+    dxchange.write_tiff_stack(recon, fname=os.path.join(output_dir, 'recon'), axis=0)
     print('Reconstruction data saved with shape:', recon.shape)
 
     # Save the rotation center to a text file.
