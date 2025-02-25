@@ -24,8 +24,8 @@ tomography_flow/
 ├── imgs/
 └── README.md # This file
 
-
 ## Building the container Image
+
    ```bash
    cd recipes
    podman build -t tomography_flow:latest .
@@ -36,8 +36,8 @@ tomography_flow/
 
   ```bash
   podman run -it --rm \
-  -v "/home/ravescovi/Downloads/NSLS2":/data \
-  -v "/home/ravescovi/workspace/tomography_flow":/app \
+  -v "$PWD/NSLS2":/data \
+  -v "$PWD/tomography_flow":/app \
   tomography_flow:latest python3 /app/tomo_flow/run_tomopy.py \
     --proj-file /data/scan_00244/proj_00000.hdf \
     --angles-file /data/scan_00244/scan_00244.nxs \
@@ -45,6 +45,6 @@ tomography_flow/
     --flat-file /data/scan_00245/flat_00000.hdf \
     --recon-init 1000 \
     --recon-end 1010 \
-    --output-dir /data/scan_00244/recon_output \
+    --output-dir /data/recon_output \
     --show-images
-    ```
+  ```
