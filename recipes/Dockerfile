@@ -8,6 +8,9 @@ RUN conda install -y -c conda-forge python=3.11 tomopy dxchange matplotlib && \
 # Install globus-compute-sdk via pip.
 RUN pip install --no-cache-dir globus-compute-sdk
 
+# Set the maximum number of threads for NumExpr.
+ENV NUMEXPR_MAX_THREADS=64
+
 # Set the working directory.
 WORKDIR /app
 
